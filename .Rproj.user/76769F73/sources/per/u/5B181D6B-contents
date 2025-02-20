@@ -1,0 +1,23 @@
+library(tidyverse)
+
+PPG <- tim_duncan_career$PTS / tim_duncan_career$GS
+tim_duncan_career <- cbind(tim_duncan_career, PPG)
+
+APPG <- anthony_davis_career$PTS / anthony_davis_career$GS
+anthony_davis_career <- cbind(anthony_davis_career, APPG)
+
+ggplot(tim_duncan_career, aes(x = GS, y = PPG.1, color = PPG.1)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Tim Duncan Career Points per Game",
+       x = "Games Played",
+       y = "Points per Game")
+
+
+ggplot(anthony_davis_career, aes(x = GS, y = APPG.1)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Anthony Davis Career Points per Game",
+       x = "Games Played",
+       y = "Points per Game")
+

@@ -1,0 +1,83 @@
+"...now remove the points, lets talk just about their game - their offensive game. bro. Anthony Davis. 3 point shot, mid range, 
+can put the ball on the floor, he can do turnarounds, he has one of the best footworks inside the NB-"
+
+"YOU HAVE NO IDEA HOW GOOD TIM DUNCAN WAS OH MY GOD I CANT BELIEVE I AM HEARING THIS"
+
+
+csv formatting
+
+Each Row is a specific player during a specific season
+
+PLAYER_ID, SEASON_ID, LEAGUE_ID, TEAM_ID, TEAM_ABBREVIATION, PLAYER_AGE
+GP - Games Played
+GS - Games Started
+MIN - Minutes Played 
+FGM - Field Goals Made (total)
+FGA - Field Goals Attempted
+FGA_PCT - Field Goal Percentage (% of field goals made) formula: (FGM)/(FGA)
+FG3M - 3pt Field Goals Made
+FG3A - 3pt Field Goal Attempts
+FG3_PCT - 3pt Field Goal percentage formula: (FG3M) / (FG3A)
+FTM - Free Throws Made
+FTA - Free Throws Attempted
+FT_PCT - Free Throws Percentage (% of free throws made)
+OREB - Offensive Rebounds
+DREB - Defensive Rebounds
+REB - Rebounds
+AST - Assists
+BLK - Blocks
+TOV - Turnovers
+PF - Personal Fouls
+PTS - Points
+PlayerName - Full Name
+
+
+
+(Helpful formulas I found on internet):
+
+(I will need to compile game data for both AD and Timmy for this --- maybe a small sample space as well but well see)
+PIE Formula=(PTS + FGM + FTM – FGA – FTA + Deff.REB + Off.REB/2 + AST + STL + BLK/2 – PF – TO) / (Game.PTS + Game.FGM + Game.FTM – Game.FGA – Game.FTA + Game.Deff.REB + Game.Off.REB/2 + Game.AST + Game.STL + Game.BLK/2 – Game.PF – Game.TO)
+
+
+
+
+Courtesy of FTRS writer davidkgagne...
+
+Possesions (TmPoss) = .5 * (FGA + .475 * FTA - ORB + TOV)
+Estimates number of possessions a team has in a game/season; Substitute Opponents' totals to get their number of possessions (OppPoss)
+
+Offensive Rating (OR) = 100 / (TmPoss + OppPoss) * Pts
+Defensive Rating (DR) = 100 / (TmPoss + OppPoss) * OppPts
+Adjusts a team's scoring offense and defense for their pace of play, allows you to better compare a team like Wisconsin to a team like Duke
+
+Effective Field Goal Percentage (eFG%) = (FG + .5 * 3P) / FGA
+Adjusts a player's or team's FG% for the fact that a 3 pointer is worth 1.5 times a standard FG
+
+True Shooting Percentage (TS%) = Pts / (2 * (FGA + .475 * FTA))
+Adjusts standard FG% to include their FT%, encompasses all ways to score (my preferred shooting % stat)
+
+Free Throw Rate (FTR) = FT / FGA
+A measure of both how often a player/team gets to the line, as well as how often they make their free throws
+
+Offensive Rebounding Percentage (ORB%) = ORB / MP / (TmORB + OppDRB) * TmMP / 5
+Defensive Rebounding Percentage (DRB%) = DRB / MP / (TmDRB + OppORB) * TmMP / 5
+Total Rebounding Percentage (TRB%) = TRB / MP / (TmTRB + OppTRB) * TmMP / 5
+Measures the percentage of the available rebounds a player grabs at the offensive and defensive ends of the floor while he is in the game. TRB% measures the total rebounds he grabs of those available while he is in the game.
+
+Hollinger Assist Ratio (hAST%) = AST / (FGA + .475 * FTA + AST + TOV)
+Think of Carmelo Anthony for this statistic, it is a "ball stopper" stat. This divides the number of assists a player has by the number of offensive possessions that end in that player's hands.
+
+Pomeroy Assist Ratio (pAST%) = AST / (((MP / (TmMP / 5)) * TmFG ) - FG)
+The percentage of teammate baskets a player assisted on while he was on the court - my preferred Assists statistic
+
+Assists per Team Possession (AST/p%) = AST / ((MP / (TmMP / 5)) * TmPoss)
+Adjusts pAST% to account for pace of play; penalizes player for teammate mistakes (TOV, missed FGA)
+
+Steal Percentage (STL%) = STL / ((MP / (TmMP / 5)) * OppPoss)
+Percent of opponent possessions in which a player gets a steal
+
+Block Percentage (BLK%) = BLK / ((MP / (TmMP / 5 )) * (OppFGA - Opp3PA))
+Percent of opponents' "blockable" shots that the player blocks (removes 3 point shots, as these are generally not "blockable", somewhat arbitrary since you see these blocked and a mid range jump shot is just as unlikely to be blocked, yet is included in the sample)
+
+Turnover Percentage (TOV%) = TOV / (FGA + .475*FTA + AST + TOV)
+Percent of a player's possessions that ends in turnovers, essentially the same as the hAST% equation, but for turnovers rather than assists
