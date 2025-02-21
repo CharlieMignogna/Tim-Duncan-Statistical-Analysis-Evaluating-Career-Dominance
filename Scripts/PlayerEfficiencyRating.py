@@ -1,6 +1,9 @@
 from nba_api.stats.static import players 
 from nba_api.stats.endpoints import playercareerstats, playergamelog, leaguedashplayerstats
 import pandas as pd
+import os
+import time
+from requests.exceptions import ReadTimeout
 
 # get player ID based on player name
 def get_player_id(player_name):
@@ -16,17 +19,31 @@ def fetch_player_stats(player_id):
     career_df = career.get_data_frames()[0]
     return career_df
 
-# fetch player game logs for a specific season
-def fetch_player_gamelog(player_id, season):
-    game_logs = playergamelog.PlayerGameLog(player_id=player_id, season=season)
-    game_logs_df = game_logs.get_data_frames()[0]
-    return game_logs_df
+# fetch player game logs for a specific season with retry logic
+def fetch_player_gamelog(player_id, season, retries=3, timeout=60):
+    for i in range(retries):
+        try:
+            game_logs = playergamelog.PlayerGameLog(player_id=player_id, season=season, timeout=timeout)
+            game_logs_df = game_logs.get_data_frames()[0]
+            return game_logs_df
+        except ReadTimeout:
+            print(f"Read timeout occurred. Retrying {i+1}/{retries}...")
+            time.sleep(5)  # wait for 5 seconds before retrying
+    print(f"Failed to fetch game logs for player {player_id} in season {season} after {retries} retries.")
+    return pd.DataFrame()  # return an empty DataFrame if all retries fail
 
-# fetch league stats for a specific season
-def fetch_league_stats(season):
-    league_stats = leaguedashplayerstats.LeagueDashPlayerStats(season=season)
-    league_stats_df = league_stats.get_data_frames()[0]
-    return league_stats_df
+# fetch league stats for a specific season with retry logic
+def fetch_league_stats(season, retries=3, timeout=60):
+    for i in range(retries):
+        try:
+            league_stats = leaguedashplayerstats.LeagueDashPlayerStats(season=season, timeout=timeout)
+            league_stats_df = league_stats.get_data_frames()[0]
+            return league_stats_df
+        except ReadTimeout:
+            print(f"Read timeout occurred. Retrying {i+1}/{retries}...")
+            time.sleep(5)  # wait for 5 seconds before retrying
+    print(f"Failed to fetch league stats for season {season} after {retries} retries.")
+    return pd.DataFrame()  # return an empty DataFrame if all retries fail
 
 # calculate unadjusted PER for a player in a specific season
 def calculate_uPER(stats):
@@ -58,6 +75,9 @@ def calculate_PER(player_name, season):
     
     # Fetch player game logs for the season
     game_logs = fetch_player_gamelog(player_id, season)
+    if game_logs.empty:
+        print(f"No game logs found for {player_name} in season {season}")
+        return None
     
     # Aggregate the stats from the game logs
     aggregated_stats = game_logs[['PTS', 'FGM', 'FTM', 'FG3M', 'AST', 'REB', 'OREB', 'DREB', 'BLK', 'STL', 'FGA', 'FTA', 'TOV', 'MIN']].sum()
@@ -68,6 +88,9 @@ def calculate_PER(player_name, season):
 
     # Fetch league stats for the season
     league_stats = fetch_league_stats(season)
+    if league_stats.empty:
+        print(f"No league stats found for season {season}")
+        return None
 
     # Calculate league averages
     if 'PACE' in league_stats.columns:
@@ -91,10 +114,38 @@ def calculate_PER(player_name, season):
     
     print(f"{player_name}'s PER: {normalized_PER}")
 
-    # Save data to CSV files
-    game_logs.to_csv(f"{player_name}_game_logs_{season}.csv", index=False)
+    # Create subfolder for game logs if it doesn't exist
+    subfolder = 'game_logs'
+    if not os.path.exists(subfolder):
+        os.makedirs(subfolder)
 
-# Example usage
-calculate_PER('Tim Duncan', '2008-09')
-calculate_PER('Russell Westbrook', '2016-17')
-calculate_PER('Kevin Durant', '2016-17')
+    # Save data to CSV files in the subfolder
+    game_logs.to_csv(os.path.join(subfolder, f"{player_name}_game_logs_{season}.csv"), index=False)
+
+    return normalized_PER
+
+def calculate_PER_for_all_seasons(player_name):
+    player_id = get_player_id(player_name)
+    if not player_id:
+        print(f"Player {player_name} not found")
+        return
+    
+    # Fetch player career stats to get the seasons played
+    career_stats = fetch_player_stats(player_id)
+    seasons = career_stats['SEASON_ID'].unique()
+    
+    per_by_season = []
+    for season in seasons:
+        per = calculate_PER(player_name, season)
+        if per is not None:
+            per_by_season.append({'Season': season, 'PER': per, 'Player': player_name})
+    
+    return pd.DataFrame(per_by_season)
+
+# Calculate PER for Tim Duncan and Anthony Davis
+tim_duncan_per = calculate_PER_for_all_seasons('Tim Duncan')
+anthony_davis_per = calculate_PER_for_all_seasons('Anthony Davis')
+
+# Combine the results and save to CSV
+combined_per = pd.concat([tim_duncan_per, anthony_davis_per])
+combined_per.to_csv('tim_duncan_anthony_davis_per.csv', index=False)

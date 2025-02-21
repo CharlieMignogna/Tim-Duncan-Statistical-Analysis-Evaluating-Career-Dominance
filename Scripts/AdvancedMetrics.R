@@ -6,10 +6,15 @@ library(dplyr)
 library(ggplot2)
 library(languageserver)
 
-player_stats <- read.csv("combined_stats.csv")
+per_data <- read.csv("tim_duncan_anthony_davis_per.csv")
 
-tim_duncan_data <- progress_data %>%
-  filter(PlayerName == "Tim Duncan")
+per_data$Season <- as.factor(per_data$Season)
 
-anthony_davis_data <- progress_data %>%
-  filter(PlayerName == "Anthony Davis")
+ggplot(per_data, aes(x = Season, y = PER, color = Player)) +
+  geom_point(size = 3) +
+  geom_line(aes(group = Player)) +
+  labs(title = "PER of Tim Duncan and Anthony Davis by Season",
+       x = "Season",
+       y = "PER") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))

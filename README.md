@@ -480,3 +480,59 @@ The Comprehensive uPER formula, developed by John Hollinger:
 ![perFormula](Images/PER_Formula.png)
 
 
+## Results
+
+Using my PlayerEfficiencyRating script I calculated Tim duncan and Anthony Davis's PER for each season they were in the nba and stored the values in a csv. Then I moved to R and plotted the data
+```python
+def calculate_PER_for_all_seasons(player_name):
+    player_id = get_player_id(player_name)
+    if not player_id:
+        print(f"Player {player_name} not found")
+        return
+    
+    # Fetch player career stats to get the seasons played
+    career_stats = fetch_player_stats(player_id)
+    seasons = career_stats['SEASON_ID'].unique()
+    
+    per_by_season = []
+    for season in seasons:
+        per = calculate_PER(player_name, season)
+        if per is not None:
+            per_by_season.append({'Season': season, 'PER': per, 'Player': player_name})
+    
+    return pd.DataFrame(per_by_season)
+
+# Calculate PER for Tim Duncan and Anthony Davis
+tim_duncan_per = calculate_PER_for_all_seasons('Tim Duncan')
+anthony_davis_per = calculate_PER_for_all_seasons('Anthony Davis')
+
+# Combine the results and save to CSV
+combined_per = pd.concat([tim_duncan_per, anthony_davis_per])
+combined_per.to_csv('tim_duncan_anthony_davis_per.csv', index=False)
+```
+
+```R
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(languageserver)
+
+# Load the PER data
+per_data <- read.csv("tim_duncan_anthony_davis_per.csv")
+
+# Convert Season to a factor to ensure proper ordering in the plot
+per_data$Season <- as.factor(per_data$Season)
+
+# Plot the PER using a scatter plot
+ggplot(per_data, aes(x = Season, y = PER, color = Player)) +
+  geom_point(size = 3) +
+  geom_line(aes(group = Player)) +
+  labs(title = "PER of Tim Duncan and Anthony Davis by Season",
+       x = "Season",
+       y = "PER") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+![PERresults](Images/TimDuncanADPER.png)
+
