@@ -11,7 +11,9 @@
 - [Appendix](#appendix)
 
 ## Introduction
-A video has started to go viral recently of a group of guys talking about basketball, one of them suggests that Anthony Davis is a better version of Tim Duncan and almost immediately another guy yells out in pure disappointment "You have no idea how good Tim Duncan was." Here I am going to try to prove that Tim Duncan is indeed better than this poor guy thinks he is, using data analytics and statistical analysis.
+A video has started to go viral recently of a group of guys talking about basketball, one of them suggests that Anthony Davis is a better version of Tim Duncan and almost immediately another guy yells out in pure disappointment "You have no idea how good Tim Duncan was."
+
+In this project I am going to try to prove that Tim Duncan is indeed better that guy thought he was, using data analytics and statistical analysis.
 
 ## Methods and Technologies
 **Methods Used:**
@@ -123,8 +125,9 @@ PLAYER_ID,SEASON_ID,LEAGUE_ID,TEAM_ID,TEAM_ABBREVIATION,PLAYER_AGE,GP,GS,MIN,FGM
 # Basic Stats (Box Scores) - R
 
 I took the combined_stats.csv and imported it as a dataset into R 
-## BasicStats.R
-The BasicStats.R script is designed to analyze and visualize the basic statistics of NBA players, specifically focusing on Tim Duncan and Anthony Davis. The script processes the combined statistics data, calculates average statistics, and generates visualizations to compare the performances of these two players.
+
+
+I designed a R script to analyze and visualize the basic statistics of NBA players, specifically focusing on Tim Duncan and Anthony Davis. The script processes the combined statistics data, calculates average statistics, and generates visualizations to compare the performances of these two players.
 
 ##  Key Functions and Code Snippets
 

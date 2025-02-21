@@ -75,11 +75,11 @@ def calculate_PER(player_name, season):
     else:
         # Calculate league pace if not directly available (using formula: league_pace = ((FGA + 0.44 * FTA - OREB + TOV) / MIN).mean() * 48)
         league_pace = ((league_stats['FGA'] + 0.44 * league_stats['FTA'] - league_stats['OREB'] + league_stats['TOV']) / league_stats['MIN']).mean() * 48  # Assuming 48 minutes per game
-
+     
     if 'PER' in league_stats.columns:
         league_avg_PER = league_stats['PER'].mean()
     else:
-        # Calculate league average PER using available data (using formula: league_avg_PER = ((PTS + FGM + FTM + FG3M + AST + REB + OREB + DREB + BLK + STL - (FGA - FGM) - (FTA - FTM) - TOV) / MIN).mean())
+        # Calculate league average PER using available data
         league_avg_PER = ((league_stats['PTS'] + league_stats['FGM'] + league_stats['FTM'] + league_stats['FG3M'] + league_stats['AST'] + league_stats['REB'] + league_stats['OREB'] + league_stats['DREB'] + league_stats['BLK'] + league_stats['STL']
             - (league_stats['FGA'] - league_stats['FGM']) - (league_stats['FTA'] - league_stats['FTM']) - league_stats['TOV']) / league_stats['MIN']).mean()
 
