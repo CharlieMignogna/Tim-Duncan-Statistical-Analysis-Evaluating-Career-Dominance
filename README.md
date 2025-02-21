@@ -3,8 +3,8 @@ https://youtu.be/7wd0ZTT4n9U?si=MBooBGdMpX-kU5Dj
 ## Table of Contents
 - [Introduction](#introduction)
 - [Methods and Technologies](#methods-and-technologies)
-- [Preface](#preface)
-- [Basic Stats](#basic-stats)
+- [NBA Stats Aquisition](#Python-Script-for-NBA-Stats-Data-Aquisition)
+- [Basic Stats](#Basic-Stats)
 - [Shooting Analysis](#shooting-analysis)
 - [Advanced Metrics](#advanced-metrics)
 - [Conclusion](#conclusion)
@@ -123,7 +123,7 @@ PLAYER_ID,SEASON_ID,LEAGUE_ID,TEAM_ID,TEAM_ABBREVIATION,PLAYER_AGE,GP,GS,MIN,FGM
 76001,1990-91,0,1610612757,POR,23.0,43,0,290,55,116,0.474,0,0,0.0,25,44,0.568,27,62,89,12,4,12,22,39,135,Alaa Abdelnaby
 ```
 
-# Basic Stats (Box Scores) - R
+# Basic Stats
 
 I took the combined_stats.csv and imported it as a dataset into R 
 
@@ -393,7 +393,6 @@ def calculate_uPER(stats):
 ```
 
 ### adjust_for_pace(uPER, team_pace, league_pace)
-Adjusts the unadjusted PER for the pace of play.
 ```python
 # Function to adjust PER for pace (pace being the number of possessions per 48 minutes)
 def adjust_for_pace(uPER, team_pace, league_pace):
@@ -407,7 +406,6 @@ def normalize_PER(uPER, league_avg_PER):
 ```
 
 ### calculate_PER(player_name, season)
-Main function to calculate the PER for a given player and season.
 ```python
 # calculate PER for a player in a specific season
 def calculate_PER(player_name, season):
