@@ -31,6 +31,7 @@ def fetch_league_stats(season):
 
 # Function to calculate unadjusted PER for a player in a specific season
 def calculate_uPER(stats):
+    # check for all columns 
     required_columns = ['PTS', 'FGM', 'FTM', 'FG3M', 'AST', 'REB', 'BLK', 'STL', 'FGA', 'FTA', 'TOV', 'MIN']
     for col in required_columns:
         if col not in stats:
@@ -40,7 +41,7 @@ def calculate_uPER(stats):
         - (stats['FGA'] - stats['FGM']) - (stats['FTA'] - stats['FTM']) - stats['TOV']) / stats['MIN']
     return uPER
 
-# Function to adjust PER for pace 
+# Function to adjust PER for pace (pace being the number of possessions per 48 minutes)
 def adjust_for_pace(uPER, team_pace, league_pace):
     return uPER * (league_pace / team_pace)
 
@@ -50,35 +51,33 @@ def normalize_PER(uPER, league_avg_PER):
 
 # calculate PER for a player in a specific season
 def calculate_PER(player_name, season):
+    # Get player ID
     player_id = get_player_id(player_name)
     if not player_id:
         print(f"Player {player_name} not found")
         return
     
+    # Fetch player game logs for the season
     game_logs = fetch_player_gamelog(player_id, season)
-    print("Game Logs:")
-    print(game_logs)
     
     # Aggregate the stats from the game logs
     aggregated_stats = game_logs[['PTS', 'FGM', 'FTM', 'FG3M', 'AST', 'REB', 'BLK', 'STL', 'FGA', 'FTA', 'TOV', 'MIN']].sum()
-    print("Aggregated Stats:")
-    print(aggregated_stats)
     
+    # Calculate unadjusted 
     uPER = calculate_uPER(aggregated_stats)
     print(f"Unadjusted PER (uPER): {uPER}")
 
+    # Fetch league stats for the season
     league_stats = fetch_league_stats(season)
-    print("League Stats:")
-    print(league_stats)
 
     # Calculate league averages
     if 'PACE' in league_stats.columns:
         league_pace = league_stats['PACE'].mean()
     else:
-        # Calculate league pace if not directly available
+        # Calculate league pace if not directly available (using formula: Pace = 48 * ((Tm Poss + Opp Poss) / (2 * (Tm MP / 5)))
         league_pace = ((league_stats['FGA'] + 0.44 * league_stats['FTA'] - league_stats['OREB'] + league_stats['TOV']) / league_stats['MIN']).mean() * 48  # Assuming 48 minutes per game
 
-    # Calculate league average PER if not directly available
+    # Calculate league average PER if not directly available (using formula: PER = ((PTS + FGM + FTM + FG3M + AST + REB + BLK + STL - (FGA - FGM) - (FTA - FTM) - TOV) / MIN).mean()
     if 'PER' in league_stats.columns:
         league_avg_PER = league_stats['PER'].mean()
     else:
@@ -88,7 +87,8 @@ def calculate_PER(player_name, season):
 
     print(f"League Pace: {league_pace}, League Avg PER: {league_avg_PER}")
 
-    pace_adjusted_PER = adjust_for_pace(uPER, league_pace, league_pace)  # Assuming team pace is equal to league pace
+    # Adjust and normalize PER 
+    pace_adjusted_PER = adjust_for_pace(uPER, league_pace, league_pace)  
     normalized_PER = normalize_PER(pace_adjusted_PER, league_avg_PER)
     
     print(f"{player_name}'s PER: {normalized_PER}")
@@ -96,5 +96,7 @@ def calculate_PER(player_name, season):
     # Save data to CSV files
     game_logs.to_csv(f"{player_name}_game_logs_{season}.csv", index=False)
 
-
-calculate_PER('Tim Duncan', '2006-07')
+# Example usage
+calculate_PER('Tim Duncan', '2008-09')
+calculate_PER('Russell Westbrook', '2016-17')
+calculate_PER('Kevin Durant', '2016-17')

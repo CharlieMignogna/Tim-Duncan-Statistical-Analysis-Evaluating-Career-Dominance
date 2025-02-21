@@ -49,14 +49,12 @@ import os
 ```
 
 ### Get All Players
-Retreives a list of all NBA players
 ```python
 # Get all players
 all_players = players.get_players()
 ```
 
 ### Initialize Data Structures
-Initializes an empty list to hold the data frames and loads progress if it exists.
 ```python
 # Initialize an empty list to hold the data frames
 all_players_stats = []
@@ -71,7 +69,6 @@ else:
 
 ```
 ### Fetch Career Stats for Each Player
-Loops through each player and fetches their career stats, saving progress periodically.
 ```python
 # Loop through each player and get their career stats
 for player in all_players:
@@ -102,7 +99,6 @@ for player in all_players:
 ```
 
 ### Combine and Save Data
-Combines all player stats into a single DataFrame and saves it to a CSV file.
 ```python
 # Combine all player stats into a single DataFrame
 combined_stats = pd.concat(all_players_stats, ignore_index=True)
@@ -124,7 +120,7 @@ PLAYER_ID,SEASON_ID,LEAGUE_ID,TEAM_ID,TEAM_ABBREVIATION,PLAYER_AGE,GP,GS,MIN,FGM
 76001,1990-91,0,1610612757,POR,23.0,43,0,290,55,116,0.474,0,0,0.0,25,44,0.568,27,62,89,12,4,12,22,39,135,Alaa Abdelnaby
 ```
 
-# Basic Stats - R
+# Basic Stats (Box Scores) - R
 
 I took the combined_stats.csv and imported it as a dataset into R 
 ## BasicStats.R
@@ -141,7 +137,6 @@ library(languageserver)
 ```
 
 ### Load and Prepare Data
-Loads the combined statistics data and filters it for relevant seasons and players.
 ```R
 # Load progress data
 progress_data <- read.csv("combined_stats.csv")
@@ -160,7 +155,6 @@ anthony_davis_data <- progress_data %>%
 ```
 
 ### Calculate Average Stats
-Computes average points, blocks, steals, rebounds, assists, and shooting percentages for all players.
 ```R
 # Calculate average stats for all players
 all_players_avg_stats <- progress_data %>%
@@ -213,7 +207,6 @@ anthony_davis_data$SEASON_ID <- as.factor(anthony_davis_data$SEASON_ID)
 - Davis, being younger, is much closer to his prime. His career averages are less diluted by a significant decline in production due to age. However, his averages will likely decrease as he ages.
 
 ## Visualization
-Generates line plots to visualize the average statistics per season for Tim Duncan, Anthony Davis, and other players.
 ```R
 # Plot average points per season
 ggplot() +
@@ -232,6 +225,7 @@ ggplot() +
 
 We can go further, however, and plot these averages and compare visually each player against each other, and the rest of the NBA.
 
+**Gray lines represent every other NBA player**
 ### Points Per Season
 ![AvgPtsPerSeason](Images/AveragePointsPerSeason.png)
 
@@ -274,7 +268,7 @@ We can go further, however, and plot these averages and compare visually each pl
 - Davis's numbers are likely more representative of his prime, but it's important to remember that his career is still ongoing, and his stats could change significantly.
 
 ## Shooting Analysis
-Now, I'm going to take a look at how each player performed when it came to making shots. To start, we'll focus on, once again, season averages.
+Now, I'm going to take a look at how each player performed when it came to making shots. To start, again we'll focus on season averages.
 
 ```R
 tim_duncan_avg_fg_pct <- round(mean(tim_duncan_data$FG_PCT, na.rm = TRUE), 2)
@@ -297,9 +291,9 @@ anthony_davis_avg_ft_pct <- round(mean(anthony_davis_data$FT_PCT, na.rm = TRUE),
 
 ### Brief Analysis of Career Shooting Averages
 - These reveal that Anthony Davis seems to be the more efficient scorer of the two, as he has slightly higher averages in field goal percentage and free throw percentage and a significantly higher 3-point percentage.
-- Davis appears to be the more efficient scorer overall, particularly due to his superior three-point and free-throw shooting. While Duncan was a highly efficient scorer in his own right, especially in the mid-range, Davis's ability to stretch the floor and convert free throws makes him statistically the more efficient scorer.
-- However, once again, it's important to remember that these are career averages. Duncan's prime scoring efficiency was likely higher than his career average due to the decline in his athleticism and role later in his career.
-- Furthermore, context is important. Duncan's role in the Spurs' system was different than Davis's role on his teams. Duncan was often a facilitator and defensive anchor, whereas Davis has been more of a primary scoring option. I'll go more into detail on this later.
+- Duncan was a highly efficient scorer in his own right, especially in the mid-range, Davis's ability to stretch the floor and convert free throws makes him statistically the more efficient scorer.
+- Again, it's important to remember that these are career averages. Duncan's prime scoring efficiency was likely higher than his career average due to the decline in his athleticism and role later in his career.
+
 
 ![FG%](Images/FG_PCT.png)
 ![FT%](Images/FT_PCT.png)
@@ -310,13 +304,20 @@ anthony_davis_avg_ft_pct <- round(mean(anthony_davis_data$FT_PCT, na.rm = TRUE),
 
 Now I am going to go beyond the most basic stats of each player and gather a more nuanced view at each of their performances in the NBA.
 
-## Player Efficency Rating (PER)
-The AdvancedStatGrab.py script is designed to calculate advanced basketball metrics, specifically the Player Efficiency Rating (PER), for Tim Duncan using data from the 2006-07 NBA season. The script fetches player game logs and league-wide statistics, aggregates the necessary data, and performs the calculations to determine PER.
+## Player Efficiency Rating (PER)
+The PlayerEfficiencyRating.py script is my first script designed to calculate advanced basketball metrics, specifically the Player Efficiency Rating (PER). PlayerEfficiencyRating.py calculates the PER score for any player using data from any NBA season that they played in.
+
+### PER Formula Used
+PER Formula Used
+The unadjusted PER (uPER) formula used in the script is:
+
+[ \text{uPER} = \frac{\text{PTS} + \text{FGM} + \text{FTM} + \text{FG3M} + \text{AST} + \text{REB} + \text{BLK} + \text{STL} - (\text{FGA} - \text{FGM}) - (\text{FTA} - \text{FTM}) - \text{TOV}}{\text{MIN}} ]
+
+This formula calculates the unadjusted PER by summing the positive contributions (points, field goals made, free throws made, three-point field goals made, assists, rebounds, blocks, steals) and subtracting the negative contributions (missed field goals, missed free throws, turnovers), then dividing by the total minutes played.
 
 ## Key Functions and Code Snippets
 
 ### get_player_id(player_name)
-Fetches the player ID based on the player's full name.
 ```python
 def get_player_id(player_name):
     player_dict = players.get_players()
@@ -326,7 +327,6 @@ def get_player_id(player_name):
     return None
 ```
 ### fetch_player_gamelog(player_id, season)
-Fetches the game logs for a specific player and season.
 ```python
 def fetch_player_gamelog(player_id, season):
     game_logs = playergamelog.PlayerGameLog(player_id=player_id, season=season)
@@ -335,7 +335,6 @@ def fetch_player_gamelog(player_id, season):
 ```
 
 ### fetch_league_stats(season)
-Fetches league-wide statistics for a specific season.
 ```python
 def fetch_league_stats(season):
     league_stats = leaguedashplayerstats.LeagueDashPlayerStats(season=season)
@@ -347,6 +346,7 @@ def fetch_league_stats(season):
 Calculates the unadjusted Player Efficiency Rating (uPER) based on aggregated player stats.
 ```python
 def calculate_uPER(stats):
+    # check for all columns 
     required_columns = ['PTS', 'FGM', 'FTM', 'FG3M', 'AST', 'REB', 'BLK', 'STL', 'FGA', 'FTA', 'TOV', 'MIN']
     for col in required_columns:
         if col not in stats:
@@ -360,12 +360,12 @@ def calculate_uPER(stats):
 ### adjust_for_pace(uPER, team_pace, league_pace)
 Adjusts the unadjusted PER for the pace of play.
 ```python
+# Function to adjust PER for pace (pace being the number of possessions per 48 minutes)
 def adjust_for_pace(uPER, team_pace, league_pace):
     return uPER * (league_pace / team_pace)
 ```
 
 ### normalize_PER(uPER, league_avg_PER)
-Normalizes the pace-adjusted PER to the league average PER.
 ```python
 def normalize_PER(uPER, league_avg_PER):
     return uPER * (15 / league_avg_PER)
@@ -374,36 +374,35 @@ def normalize_PER(uPER, league_avg_PER):
 ### calculate_PER(player_name, season)
 Main function to calculate the PER for a given player and season.
 ```python
+# calculate PER for a player in a specific season
 def calculate_PER(player_name, season):
+    # Get player ID
     player_id = get_player_id(player_name)
     if not player_id:
         print(f"Player {player_name} not found")
         return
     
+    # Fetch player game logs for the season
     game_logs = fetch_player_gamelog(player_id, season)
-    print("Game Logs:")
-    print(game_logs)
     
     # Aggregate the stats from the game logs
     aggregated_stats = game_logs[['PTS', 'FGM', 'FTM', 'FG3M', 'AST', 'REB', 'BLK', 'STL', 'FGA', 'FTA', 'TOV', 'MIN']].sum()
-    print("Aggregated Stats:")
-    print(aggregated_stats)
     
+    # Calculate unadjusted 
     uPER = calculate_uPER(aggregated_stats)
     print(f"Unadjusted PER (uPER): {uPER}")
 
+    # Fetch league stats for the season
     league_stats = fetch_league_stats(season)
-    print("League Stats:")
-    print(league_stats)
 
     # Calculate league averages
     if 'PACE' in league_stats.columns:
         league_pace = league_stats['PACE'].mean()
     else:
-        # Calculate league pace if not directly available
+        # Calculate league pace if not directly available (using formula: Pace = 48 * ((Tm Poss + Opp Poss) / (2 * (Tm MP / 5)))
         league_pace = ((league_stats['FGA'] + 0.44 * league_stats['FTA'] - league_stats['OREB'] + league_stats['TOV']) / league_stats['MIN']).mean() * 48  # Assuming 48 minutes per game
 
-    # Calculate league average PER if not directly available
+    # Calculate league average PER if not directly available (using formula: PER = ((PTS + FGM + FTM + FG3M + AST + REB + BLK + STL - (FGA - FGM) - (FTA - FTM) - TOV) / MIN).mean()
     if 'PER' in league_stats.columns:
         league_avg_PER = league_stats['PER'].mean()
     else:
@@ -413,21 +412,30 @@ def calculate_PER(player_name, season):
 
     print(f"League Pace: {league_pace}, League Avg PER: {league_avg_PER}")
 
-    pace_adjusted_PER = adjust_for_pace(uPER, league_pace, league_pace)  # Assuming team pace is equal to league pace
+    # Adjust and normalize PER 
+    pace_adjusted_PER = adjust_for_pace(uPER, league_pace, league_pace)  
     normalized_PER = normalize_PER(pace_adjusted_PER, league_avg_PER)
     
     print(f"{player_name}'s PER: {normalized_PER}")
 
     # Save data to CSV files
     game_logs.to_csv(f"{player_name}_game_logs_{season}.csv", index=False)
-
-# Example usage
-calculate_PER('Tim Duncan', '2006-07')
 ```
+## Accuracy
+```python
+# Example usage
+calculate_PER('Tim Duncan', '2008-09')
+calculate_PER('Russell Westbrook', '2016-017')
+calculate_PER('Kevin Durant', '2016-17')
+```
+Calling the calculate_PER function on Tim Duncan, Russle Westbrook, and Kevin Durant in the specified seasons returned this:
+
+![TerminalOutPut](Images/PER_Output.png)
+
+And the offical Player Efficiency Rating each of them got for those seasons were:
+
+![TimDuncanPER](Images/TimDuncanOfficialPER.png)
+and
+![KDandRussellPER](Images/OfficialPer's.png)
 
 
-
-
-
-
-    
