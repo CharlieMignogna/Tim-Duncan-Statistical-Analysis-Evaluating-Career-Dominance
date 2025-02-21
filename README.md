@@ -311,7 +311,7 @@ The PlayerEfficiencyRating.py script is my first script designed to calculate ad
 PER Formula Used
 The unadjusted PER (uPER) formula used in the script is:
 
-[ \text{uPER} = \frac{\text{PTS} + \text{FGM} + \text{FTM} + \text{FG3M} + \text{AST} + \text{REB} + \text{BLK} + \text{STL} - (\text{FGA} - \text{FGM}) - (\text{FTA} - \text{FTM}) - \text{TOV}}{\text{MIN}} ]
+ \[ \text{uPER} = \frac{\text{PTS} + \text{FGM} + \text{FTM} + \text{FG3M} + \text{AST} + \text{REB} + \text{BLK} + \text{STL} - (\text{FGA} - \text{FGM}) - (\text{FTA} - \text{FTM}) - \text{TOV}}{\text{MIN}} \]
 
 This formula calculates the unadjusted PER by summing the positive contributions (points, field goals made, free throws made, three-point field goals made, assists, rebounds, blocks, steals) and subtracting the negative contributions (missed field goals, missed free throws, turnovers), then dividing by the total minutes played.
 
@@ -437,5 +437,12 @@ And the offical Player Efficiency Rating each of them got for those seasons were
 ![TimDuncanPER](Images/TimDuncanOfficialPER.png)
 and
 ![KDandRussellPER](Images/OfficialPer's.png)
+
+
+The Unadjusted Personal Efficiency Rating (uPER) formula is, in actuality, extremely comprehensive. I am using a simplified version here and becuase of that my script isn't completely accurate. However once adjusted and normalized the PER that is returned is still very close to the official ratings. 
+
+The Comprehensive uPER formula, developed by John Hollinger:
+
+\[ \text{uPER} = \frac{1}{\text{MP}} \times \left[ \text{3P} + \left(\frac{2}{3}\right) \times \text{AST} + \left(2 - \text{factor} \times \left(\frac{\text{team_AST}}{\text{team_FG}}\right)\right) \times \text{FG} + \left(\text{FT} \times 0.5 \times \left(1 + \left(1 - \left(\frac{\text{team_AST}}{\text{team_FG}}\right)\right) + \left(\frac{2}{3}\right) \times \left(\frac{\text{team_AST}}{\text{team_FG}}\right)\right)\right) - \text{VOP} \times \text{TOV} - \text{VOP} \times \text{DRB%} \times (\text{FGA} - \text{FG}) - \text{VOP} \times 0.44 \times (0.44 + (0.56 \times \text{DRB%})) \times (\text{FTA} - \text{FT}) + \text{VOP} \times (1 - \text{DRB%}) \times (\text{TRB} - \text{ORB}) + \text{VOP} \times \text{DRB%} \times \text{ORB} + \text{VOP} \times \text{STL} + \text{VOP} \times \text{DRB%} \times \text{BLK} - \text{PF} \times \left(\left(\frac{\text{lg_FT}}{\text{lg_PF}}\right) - 0.44 \times \left(\frac{\text{lg_FTA}}{\text{lg_PF}}\right) \times \text{VOP}\right) \right] \]
 
 
