@@ -2,5 +2,10 @@
     "r.rterm.mac": "/Users/charliemignogna/Desktop/YouHaveNoIdeaHowGoodTimDuncanWas/.venv/bin/radian",
     "r.plot.defaults.fullWindowMode": true,
     "r.plot.useHttpgd": true,
-    "r.bracketedPaste": true
+    "r.bracketedPaste": true,
+    "python.testing.pytestArgs": [
+        "Scripts"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
