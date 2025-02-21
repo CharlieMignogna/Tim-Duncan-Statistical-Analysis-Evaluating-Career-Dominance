@@ -11,13 +11,10 @@ https://youtu.be/7wd0ZTT4n9U?si=MBooBGdMpX-kU5Dj
 - [Appendix](#appendix)
 
 ## Introduction
-<<<<<<< HEAD
 A video has started to go viral recently of a group of guys talking about basketball, one of them suggests that Anthony Davis is a better version of Tim Duncan and almost immediately another guy yells out in pure disappointment "You have no idea how good Tim Duncan was."
 
 In this project I am going to try to prove that Tim Duncan is indeed better that guy thought he was, using data analytics and statistical analysis.
-=======
 
->>>>>>> 6398083c29a037616a7235b90e5906ec775bc6fd
 
 ## Methods and Technologies
 **Methods Used:**
