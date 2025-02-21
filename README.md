@@ -308,12 +308,43 @@ Now I am going to go beyond the most basic stats of each player and gather a mor
 The PlayerEfficiencyRating.py script is my first script designed to calculate advanced basketball metrics, specifically the Player Efficiency Rating (PER). PlayerEfficiencyRating.py calculates the PER score for any player using data from any NBA season that they played in.
 
 ### PER Formula Used
+
 PER Formula Used
 The unadjusted PER (uPER) formula used in the script is:
 
- \[ \text{uPER} = \frac{\text{PTS} + \text{FGM} + \text{FTM} + \text{FG3M} + \text{AST} + \text{REB} + \text{BLK} + \text{STL} - (\text{FGA} - \text{FGM}) - (\text{FTA} - \text{FTM}) - \text{TOV}}{\text{MIN}} \]
+uPER = (PTS + FGM + FTM + FG3M + AST + REB + OREB + DREB + BLK + STL
+        - (FGA - FGM) - (FTA - FTM) - TOV) / MIN
 
-This formula calculates the unadjusted PER by summing the positive contributions (points, field goals made, free throws made, three-point field goals made, assists, rebounds, blocks, steals) and subtracting the negative contributions (missed field goals, missed free throws, turnovers), then dividing by the total minutes played.
+Where, 
+
+PTS = Points
+FGM = Field Goals Made
+FTM = Free Throws Made
+FG3M = Three-Point Field Goals Made
+AST = Assists
+REB = Total Rebounds
+OREB = Offensive Rebounds
+DREB = Defensive Rebounds
+BLK = Blocks
+STL = Steals
+FGA = Field Goals Attempted
+FTA = Free Throws Attempted
+TOV = Turnovers
+MIN = Minutes Played
+
+Adjusted PER for pace,
+
+adjusted_PER = uPER * (league_pace / team_pace)
+
+and normalized to the league average,
+
+normalized_PER = adjusted_PER * (15 / league_avg_PER)
+
+( league_pace = Average number of possessions per 48 minutes for the league
+  team_pace = Number of possessions per 48 minutes for the player's team
+  league_avg_PER = Average PER for the league )
+
+** more on this formula below
 
 ## Key Functions and Code Snippets
 
@@ -347,12 +378,12 @@ Calculates the unadjusted Player Efficiency Rating (uPER) based on aggregated pl
 ```python
 def calculate_uPER(stats):
     # check for all columns 
-    required_columns = ['PTS', 'FGM', 'FTM', 'FG3M', 'AST', 'REB', 'BLK', 'STL', 'FGA', 'FTA', 'TOV', 'MIN']
+    required_columns = ['PTS', 'FGM', 'FTM', 'FG3M', 'AST', 'REB', 'OREB', 'DREB', 'BLK', 'STL', 'FGA', 'FTA', 'TOV', 'MIN']
     for col in required_columns:
         if col not in stats:
             stats[col] = 0
 
-    uPER = (stats['PTS'] + stats['FGM'] + stats['FTM'] + stats['FG3M'] + stats['AST'] + stats['REB'] + stats['BLK'] + stats['STL']
+    uPER = (stats['PTS'] + stats['FGM'] + stats['FTM'] + stats['FG3M'] + stats['AST'] + stats['REB'] + stats['OREB'] + stats['DREB'] + stats['BLK'] + stats['STL']
         - (stats['FGA'] - stats['FGM']) - (stats['FTA'] - stats['FTM']) - stats['TOV']) / stats['MIN']
     return uPER
 ```
@@ -386,7 +417,7 @@ def calculate_PER(player_name, season):
     game_logs = fetch_player_gamelog(player_id, season)
     
     # Aggregate the stats from the game logs
-    aggregated_stats = game_logs[['PTS', 'FGM', 'FTM', 'FG3M', 'AST', 'REB', 'BLK', 'STL', 'FGA', 'FTA', 'TOV', 'MIN']].sum()
+    aggregated_stats = game_logs[['PTS', 'FGM', 'FTM', 'FG3M', 'AST', 'REB', 'OREB', 'DREB', 'BLK', 'STL', 'FGA', 'FTA', 'TOV', 'MIN']].sum()
     
     # Calculate unadjusted 
     uPER = calculate_uPER(aggregated_stats)
@@ -399,15 +430,14 @@ def calculate_PER(player_name, season):
     if 'PACE' in league_stats.columns:
         league_pace = league_stats['PACE'].mean()
     else:
-        # Calculate league pace if not directly available (using formula: Pace = 48 * ((Tm Poss + Opp Poss) / (2 * (Tm MP / 5)))
+        # Calculate league pace if not directly available (using formula: league_pace = ((FGA + 0.44 * FTA - OREB + TOV) / MIN).mean() * 48)
         league_pace = ((league_stats['FGA'] + 0.44 * league_stats['FTA'] - league_stats['OREB'] + league_stats['TOV']) / league_stats['MIN']).mean() * 48  # Assuming 48 minutes per game
 
-    # Calculate league average PER if not directly available (using formula: PER = ((PTS + FGM + FTM + FG3M + AST + REB + BLK + STL - (FGA - FGM) - (FTA - FTM) - TOV) / MIN).mean()
     if 'PER' in league_stats.columns:
         league_avg_PER = league_stats['PER'].mean()
     else:
-        # Calculate league average PER using available data
-        league_avg_PER = ((league_stats['PTS'] + league_stats['FGM'] + league_stats['FTM'] + league_stats['FG3M'] + league_stats['AST'] + league_stats['REB'] + league_stats['BLK'] + league_stats['STL']
+        # Calculate league average PER using available data (using formula: league_avg_PER = ((PTS + FGM + FTM + FG3M + AST + REB + OREB + DREB + BLK + STL - (FGA - FGM) - (FTA - FTM) - TOV) / MIN).mean())
+        league_avg_PER = ((league_stats['PTS'] + league_stats['FGM'] + league_stats['FTM'] + league_stats['FG3M'] + league_stats['AST'] + league_stats['REB'] + league_stats['OREB'] + league_stats['DREB'] + league_stats['BLK'] + league_stats['STL']
             - (league_stats['FGA'] - league_stats['FGM']) - (league_stats['FTA'] - league_stats['FTM']) - league_stats['TOV']) / league_stats['MIN']).mean()
 
     print(f"League Pace: {league_pace}, League Avg PER: {league_avg_PER}")
@@ -430,7 +460,7 @@ calculate_PER('Kevin Durant', '2016-17')
 ```
 Calling the calculate_PER function on Tim Duncan, Russle Westbrook, and Kevin Durant in the specified seasons returned this:
 
-![TerminalOutPut](Images/PER_Output.png)
+![TerminalOutPut](Images/PER_Output(new).png)
 
 And the offical Player Efficiency Rating each of them got for those seasons were:
 
@@ -443,6 +473,6 @@ The Unadjusted Personal Efficiency Rating (uPER) formula is, in actuality, extre
 
 The Comprehensive uPER formula, developed by John Hollinger:
 
-\[ \text{uPER} = \frac{1}{\text{MP}} \times \left[ \text{3P} + \left(\frac{2}{3}\right) \times \text{AST} + \left(2 - \text{factor} \times \left(\frac{\text{team_AST}}{\text{team_FG}}\right)\right) \times \text{FG} + \left(\text{FT} \times 0.5 \times \left(1 + \left(1 - \left(\frac{\text{team_AST}}{\text{team_FG}}\right)\right) + \left(\frac{2}{3}\right) \times \left(\frac{\text{team_AST}}{\text{team_FG}}\right)\right)\right) - \text{VOP} \times \text{TOV} - \text{VOP} \times \text{DRB%} \times (\text{FGA} - \text{FG}) - \text{VOP} \times 0.44 \times (0.44 + (0.56 \times \text{DRB%})) \times (\text{FTA} - \text{FT}) + \text{VOP} \times (1 - \text{DRB%}) \times (\text{TRB} - \text{ORB}) + \text{VOP} \times \text{DRB%} \times \text{ORB} + \text{VOP} \times \text{STL} + \text{VOP} \times \text{DRB%} \times \text{BLK} - \text{PF} \times \left(\left(\frac{\text{lg_FT}}{\text{lg_PF}}\right) - 0.44 \times \left(\frac{\text{lg_FTA}}{\text{lg_PF}}\right) \times \text{VOP}\right) \right] \]
+![perFormula](Images/PER_Formula.png)
 
 
