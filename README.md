@@ -11,9 +11,9 @@ https://youtu.be/7wd0ZTT4n9U?si=MBooBGdMpX-kU5Dj
 - [Appendix](#appendix)
 
 ## Introduction
-A video has started to go viral recently of a group of guys talking about basketball, one of them suggests that Anthony Davis is a better version of Tim Duncan and almost immediately another guy yells out in pure disappointment "You have no idea how good Tim Duncan was."
+A video has started to go viral recently of a group of guys talking about basketball. One of them suggests that Anthony Davis is a better version of Tim Duncan, and almost immediately another guy yells out in pure disappointment, "You have no idea how good Tim Duncan was."
 
-In this project I am going to try to prove that Tim Duncan is indeed better that guy thought he was, using data analytics and statistical analysis.
+In this project I am going to try to prove that Tim Duncan is indeed better than that guy thought he was, using data analytics and statistical analysis.
 
 
 ## Methods and Technologies
@@ -30,9 +30,9 @@ In this project I am going to try to prove that Tim Duncan is indeed better that
 - ggplot2
 
 ## Preface
-"...now remove the points, lets talk just about their game - their offensive game. bro. Anthony Davis. 3 point shot, mid range, can put the ball on the floor, he can do turnarounds, he has one of the best footworks inside the NB-"
+"...now remove the points, lets talk just about their game - their offensive game. bro. Anthony Davis. 3 point shot, mid range, can put the ball on the floor, he can do turnarounds, he has some of the best footwork inside the NB-"
 
-"YOU HAVE NO IDEA HOW GOOD TIM DUNCAN WAS OH MY GOD I CANT BELIEVE I AM HEARING THIS"
+"YOU HAVE NO IDEA HOW GOOD TIM DUNCAN WAS OH MY GOD I CAN'T BELIEVE I AM HEARING THIS"
 
 ## Python Script for NBA Stats Data Aquisition 
 To begin the analysis, I wrote a script called `StatGrab.py` to fetch and compile career statistics for all NBA players using the NBA API. This script retrieves player data, processes it, and saves the results to a CSV file. It also includes functionality to save progress periodically to avoid data loss in case of interruptions.
@@ -116,7 +116,7 @@ if os.path.exists('progress.csv'):
 
 ## Raw Data from NBA API
 Example of raw data from the NBA API
- - This is just the first 2 lines of the raw data, the header and first row of data, I pulled from the API with `StatGrab.py` that I then use in the following section.
+ - This is just the first 2 lines of the raw data that I pulled from the API with `StatGrab.py` that I then use in the following section.
 
 ```csv
 PLAYER_ID,SEASON_ID,LEAGUE_ID,TEAM_ID,TEAM_ABBREVIATION,PLAYER_AGE,GP,GS,MIN,FGM,FGA,FG_PCT,FG3M,FG3A,FG3_PCT,FTM,FTA,FT_PCT,OREB,DREB,REB,AST,STL,BLK,TOV,PF,PTS,PlayerName
@@ -125,10 +125,10 @@ PLAYER_ID,SEASON_ID,LEAGUE_ID,TEAM_ID,TEAM_ABBREVIATION,PLAYER_AGE,GP,GS,MIN,FGM
 
 # Basic Stats
 
-I took the combined_stats.csv and imported it as a dataset into R 
+I took the combined_stats.csv and imported it as a dataset into R. 
 
 
-I designed a R script to analyze and visualize the basic statistics of NBA players, specifically focusing on Tim Duncan and Anthony Davis. The script processes the combined statistics data, calculates average statistics, and generates visualizations to compare the performances of these two players.
+I designed an R script to analyze and visualize the basic statistics of NBA players, specifically focusing on Tim Duncan and Anthony Davis. The script processes the combined statistics data, calculates average statistics, and generates visualizations to compare the performances of these two players.
 
 ##  Key Functions and Code Snippets
 
@@ -204,10 +204,13 @@ anthony_davis_data$SEASON_ID <- as.factor(anthony_davis_data$SEASON_ID)
 - **Steals:** 72.13
 
 
+![SeasonAverages](Images/SeasonAverages.png)
+
+
 **Statistical Comparison**:
 - This basic data (per season stat averages) shows Tim Duncan has slightly higher averages than Anthony Davis in points, assists, rebounds, and blocks - and AD leads in steals.
-- It is crucial to understand that these are *career* averages. Duncan's later years significantly impacted his scoring average, as Duncan aged he took a step back from being an offensive force (not to say he couldn't still be one) and focused on defense, play-making, leadership, and mentoring younger players.
-- His rebound and block numbers also somewhat declined in his later years but Duncan's defensive impact remained high throughout his career. Duncan's prime scoring averages would be notably higher than his career average.
+- It is crucial to understand that these are *career* averages. Duncan's later years significantly impacted his scoring average. As Duncan aged he took a step back from being an offensive force (not to say he couldn't still be one) and focused on defense, play-making, leadership, and mentoring younger players.
+- Tim Duncan's rebound and block numbers also somewhat declined in his later years, but his defensive impact remained high throughout his career. Duncan's prime scoring averages would be notably higher than his career average.
 - Davis, being younger, is much closer to his prime. His career averages are less diluted by a significant decline in production due to age. However, his averages will likely decrease as he ages.
 
 ## Visualization
@@ -225,11 +228,8 @@ ggplot() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
   ```
 
-![SeasonAverages](Images/SeasonAverages.png)
+We can go further, however, and plot these averages and compare each player against each other, along with the rest of the NBA.
 
-We can go further, however, and plot these averages and compare visually each player against each other, and the rest of the NBA.
-
-**Gray lines represent every other NBA player**
 ### Points Per Season
 ![AvgPtsPerSeason](Images/AveragePointsPerSeason.png)
 
@@ -321,20 +321,20 @@ uPER = (PTS + FGM + FTM + FG3M + AST + REB + OREB + DREB + BLK + STL
 
 Where, 
 
-PTS = Points
-FGM = Field Goals Made
-FTM = Free Throws Made
-FG3M = Three-Point Field Goals Made
-AST = Assists
-REB = Total Rebounds
-OREB = Offensive Rebounds
-DREB = Defensive Rebounds
-BLK = Blocks
-STL = Steals
-FGA = Field Goals Attempted
-FTA = Free Throws Attempted
-TOV = Turnovers
-MIN = Minutes Played
+- PTS = Points
+- FGM = Field Goals Made
+- FTM = Free Throws Made
+- FG3M = Three-Point Field Goals Made
+- AST = Assists
+- REB = Total Rebounds
+- OREB = Offensive Rebounds
+- DREB = Defensive Rebounds
+- BLK = Blocks
+- STL = Steals
+- FGA = Field Goals Attempted
+- FTA = Free Throws Attempted
+- TOV = Turnovers
+- MIN = Minutes Played
 
 Adjusted PER for pace,
 
@@ -471,16 +471,16 @@ and
 ![KDandRussellPER](Images/OfficialPer's.png)
 
 
-The Unadjusted Personal Efficiency Rating (uPER) formula is, in actuality, extremely comprehensive. I am using a simplified version here and becuase of that my script isn't completely accurate. However once adjusted and normalized the PER that is returned is still very close to the official ratings. 
+The unadjusted Personal Efficiency Rating (uPER) formula is, in actuality, extremely comprehensive. I am using a simplified version here and because of that, my script isn't completely accurate. However, once adjusted and normalized, the PER that is returned is still very close to the official ratings. 
 
-The Comprehensive uPER formula, developed by John Hollinger:
+The comprehensive uPER formula, developed by John Hollinger:
 
 ![perFormula](Images/PER_Formula.png)
 
 
 ## Results
 
-Using my PlayerEfficiencyRating script I calculated Tim duncan and Anthony Davis's PER for each season they were in the nba and stored the values in a csv. Then I moved to R and plotted the data
+Using my PlayerEfficiencyRating script, I calculated Tim Duncan and Anthony Davis's PER for each season that they were in the NBA, and stored the values in a csv. Then I moved to R and plotted the data.
 ```python
 def calculate_PER_for_all_seasons(player_name):
     player_id = get_player_id(player_name)
