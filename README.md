@@ -314,7 +314,8 @@ ggplot() +
 ```
 
 ### Field Goal Percentage
-![FG%](Images/FG%.png)
+![FG%](Images/FG_percent.png)
+
 This is the most basic of shooting statistics, the number of field goal makes out of their total field goal attempts
 
 - Both Tim Duncan and Anthony Davis are consistently above the average of the league, as shown by the dense cluster of gray lines below them
@@ -324,7 +325,8 @@ This is the most basic of shooting statistics, the number of field goal makes ou
 
 
 ### Effective Field Goal Percentage
-![eFG%](Images/eFG%.png)
+![eFG%](Images/eFG_percent.png)
+
 eFG% builds upon FG% by accounting for 3pt makes. It gives a more accurate representation of a player's shooting efficiency, especially in today's game where 3-point shooting is prevalent.
 Formula: ((Field Goals Made) + 0.5 * (3-Point Field Goals Made)) / (Field Goal Attempts)
 
@@ -335,7 +337,8 @@ Formula: ((Field Goals Made) + 0.5 * (3-Point Field Goals Made)) / (Field Goal A
 - We can see that as the league was changing Duncan kept dominating the paint and he remained an elite scorer
 
 ### True Shooting Percentage
-![TS%%](Images/TS%.png)
+![TS%%](Images/TS_percent.png)
+
 This is the most comprehensive shooting efficiency statistic. It takes into account 2-point field goals, 3-point field goals, and free throws. It is a more complex formula, but it essentially measures how many points a player scores per shooting possession. 
 Formula: (TS% = Points / (2 * (Field Goal Attempts + 0.44 * Free Throw Attempts)))
 
