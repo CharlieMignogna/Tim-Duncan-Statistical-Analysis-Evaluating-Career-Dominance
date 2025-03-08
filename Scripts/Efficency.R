@@ -1,116 +1,110 @@
 # nolint start: line_length_linter
+
 library(tidyverse)
 library(dplyr)
-library(ggplot2)
-library(languageserver)
-library(viridis)
-library(ggthemes)
+library(readr)
+library(jsonlite)
 
-# Load player_stats data
-player_stats <- read.csv("combined_stats.csv")
+# Load configuration
+config <- fromJSON("config.json")
+nba_stats_path <- config$nba_stats_path
 
-# Calculate additional efficiency metrics
-player_stats <- player_stats %>%
-  mutate(
-    FG_PCT = FGM / FGA,
-    eFG_PCT = (FGM + 0.5 * FG3M) / FGA,
-    TS_PCT = PTS / (2 * (FGA + 0.44 * FTA)),
-    PER = (PTS + REB + AST + STL + BLK - (FGA - FGM) - (FTA - FTM) - TOV) / GP
+# Read the CSV data
+nba_data <- read_csv(file.path(nba_stats_path, 'shooting_metrics.csv'))
+
+# Filter data for Tim Duncan and Anthony Davis
+highlight_players <- nba_data %>%
+  filter(PlayerName %in% c("Tim Duncan", "Anthony Davis"))
+
+# Filter data to include only seasons from 1979 onward (the year the 3-point line was introduced)
+nba_data <- nba_data %>%
+  filter(SEASON_ID >= "1979-80" & GP > 20)
+
+highlight_players <- highlight_players %>%
+  filter(SEASON_ID >= "1979-80" & GP > 20)
+
+# Find the midpoint for labeling
+tim_duncan_midpoint <- highlight_players %>% filter(PlayerName == "Tim Duncan") %>% slice(n() %/% 2 + 1)
+anthony_davis_midpoint <- highlight_players %>% filter(PlayerName == "Anthony Davis") %>% slice(n() %/% 2 + 1)
+
+# Plot eFG%
+ggplot() +
+  geom_line(data = nba_data %>% filter(!PlayerName %in% c("Tim Duncan", "Anthony Davis")), aes(x = SEASON_ID, y = `eFG%`, group = PlayerName), color = "grey", alpha = 0.5) +
+  geom_line(data = highlight_players %>% filter(PlayerName == "Tim Duncan"), aes(x = SEASON_ID, y = `eFG%`, group = PlayerName), color = "blue", size = 1.5) +
+  geom_line(data = highlight_players %>% filter(PlayerName == "Anthony Davis"), aes(x = SEASON_ID, y = `eFG%`, group = PlayerName), color = "red", size = 1.5) +
+  geom_text(data = tim_duncan_midpoint, aes(x = SEASON_ID, y = `eFG%`, label = "Tim Duncan"), color = "blue", vjust = -1.5) +
+  geom_text(data = anthony_davis_midpoint, aes(x = SEASON_ID, y = `eFG%`, label = "Anthony Davis"), color = "red", vjust = -1.5) +
+  labs(
+    title = "Effective Field Goal Percentage (eFG%) of NBA Players by Season",
+    x = "Season",
+    y = "Effective Field Goal Percentage (eFG%)"
+  ) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Find the midpoint for labeling FG%
+tim_duncan_midpoint_fg <- highlight_players %>% filter(PlayerName == "Tim Duncan") %>% slice(n() %/% 2 + 1)
+anthony_davis_midpoint_fg <- highlight_players %>% filter(PlayerName == "Anthony Davis") %>% slice(n() %/% 2 + 1)
+
+# Plot FG%
+ggplot() +
+  geom_line(data = nba_data %>% filter(!PlayerName %in% c("Tim Duncan", "Anthony Davis")), aes(x = SEASON_ID, y = `FG%`, group = PlayerName), color = "grey", alpha = 0.5) +
+  geom_line(data = highlight_players %>% filter(PlayerName == "Tim Duncan"), aes(x = SEASON_ID, y = `FG%`, group = PlayerName), color = "blue", size = 1.5) +
+  geom_line(data = highlight_players %>% filter(PlayerName == "Anthony Davis"), aes(x = SEASON_ID, y = `FG%`, group = PlayerName), color = "red", size = 1.5) +
+  geom_text(data = tim_duncan_midpoint_fg, aes(x = SEASON_ID, y = `FG%`, label = "Tim Duncan"), color = "blue", vjust = -1.5) +
+  geom_text(data = anthony_davis_midpoint_fg, aes(x = SEASON_ID, y = `FG%`, label = "Anthony Davis"), color = "red", vjust = -1.5) +
+  labs(
+    title = "Field Goal Percentage (FG%) of NBA Players by Season",
+    x = "Season",
+    y = "Field Goal Percentage (FG%)"
+  ) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Find the midpoint for labeling TS%
+tim_duncan_midpoint_ts <- highlight_players %>% filter(PlayerName == "Tim Duncan") %>% slice(n() %/% 2 + 1)
+anthony_davis_midpoint_ts <- highlight_players %>% filter(PlayerName == "Anthony Davis") %>% slice(n() %/% 2 + 1)
+
+# Plot TS%
+ggplot() +
+  geom_line(data = nba_data %>% filter(!PlayerName %in% c("Tim Duncan", "Anthony Davis")), aes(x = SEASON_ID, y = `TS%`, group = PlayerName), color = "grey", alpha = 0.5) +
+  geom_line(data = highlight_players %>% filter(PlayerName == "Tim Duncan"), aes(x = SEASON_ID, y = `TS%`, group = PlayerName), color = "blue", size = 1.5) +
+  geom_line(data = highlight_players %>% filter(PlayerName == "Anthony Davis"), aes(x = SEASON_ID, y = `TS%`, group = PlayerName), color = "red", size = 1.5) +
+  geom_text(data = tim_duncan_midpoint_ts, aes(x = SEASON_ID, y = `TS%`, label = "Tim Duncan"), color = "blue", vjust = -1.5) +
+  geom_text(data = anthony_davis_midpoint_ts, aes(x = SEASON_ID, y = `TS%`, label = "Anthony Davis"), color = "red", vjust = -1.5) +
+  labs(
+    title = "True Shooting Percentage (TS%) of NBA Players by Season",
+    x = "Season",
+    y = "True Shooting Percentage (TS%)"
+  ) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+# Calculate career averages for Tim Duncan and Anthony Davis
+tim_duncan_career_avg <- highlight_players %>%
+  filter(PlayerName == "Tim Duncan") %>%
+  summarize(
+    career_avg_efg = mean(`eFG%`, na.rm = TRUE),
+    career_avg_fg = mean(`FG%`, na.rm = TRUE),
+    career_avg_ts = mean(`TS%`, na.rm = TRUE)
   )
 
-# Ensure SEASON_ID is treated as a factor
-player_stats$SEASON_ID <- as.factor(player_stats$SEASON_ID)
+anthony_davis_career_avg <- highlight_players %>%
+  filter(PlayerName == "Anthony Davis") %>%
+  summarize(
+    career_avg_efg = mean(`eFG%`, na.rm = TRUE),
+    career_avg_fg = mean(`FG%`, na.rm = TRUE),
+    career_avg_ts = mean(`TS%`, na.rm = TRUE)
+  )
 
-# Filter data for seasons from 1970 onwards
-player_stats <- player_stats %>%
-  mutate(SEASON_YEAR = as.numeric(substr(SEASON_ID, 1, 4))) %>%
-  filter(SEASON_YEAR >= 1970)
+# Print career averages
+print(paste("Tim Duncan - Career Avg eFG%:", round(tim_duncan_career_avg$career_avg_efg, 2)))
+print(paste("Tim Duncan - Career Avg FG%:", round(tim_duncan_career_avg$career_avg_fg, 2)))
+print(paste("Tim Duncan - Career Avg TS%:", round(tim_duncan_career_avg$career_avg_ts, 2)))
 
-# Ensure PlayerName is treated as a factor with correct levels
-player_stats$PlayerName <- factor(player_stats$PlayerName)
-
-# Filter data for Tim Duncan and Anthony Davis with efficiency metrics
-tim_duncan_eff <- player_stats %>%
-  filter(PlayerName == "Tim Duncan")
-
-anthony_davis_eff <- player_stats %>%
-  filter(PlayerName == "Anthony Davis")
-
-# Combine data for Tim Duncan and Anthony Davis
-combined_data <- rbind(tim_duncan_eff, anthony_davis_eff)
-
-# Add a column to distinguish between the selected players and others
-player_stats$PlayerGroup <- ifelse(player_stats$PlayerName %in% c("Tim Duncan", "Anthony Davis"), player_stats$PlayerName, "Other")
-
-# Convert PlayerGroup to a factor *after* assigning values
-player_stats$PlayerGroup <- factor(player_stats$PlayerGroup, levels = c("Tim Duncan", "Anthony Davis", "Other"))
-
-# Remove rows with NA values in relevant columns
-player_stats <- player_stats %>%
-  filter(!is.na(SEASON_ID) & !is.na(FG_PCT) & !is.na(eFG_PCT) & !is.na(TS_PCT) & !is.na(PER))
-
-# Remove outliers
-player_stats <- player_stats %>%
-  filter(PER >= 0 & PER <= 40) %>%
-  filter(FG_PCT >= 0 & FG_PCT <= 1) %>%
-  filter(eFG_PCT >= 0 & eFG_PCT <= 1) %>%
-  filter(TS_PCT >= 0 & TS_PCT <= 1)
-
-# Define color values
-color_values <- c("Tim Duncan" = "#1a188e", "Anthony Davis" = "#9c1c27", "Other" = "gray50") # Viridis-inspired
-# Plot FG%, eFG%, and TS% over seasons for Tim Duncan and Anthony Davis using area charts
-ggplot(player_stats, aes(x = SEASON_ID, y = FG_PCT, group = PlayerName, color = PlayerGroup)) +
-  geom_line(alpha = 0.5) +
-  geom_line(data = combined_data, aes(x = SEASON_ID, y = FG_PCT, group = PlayerName, color = PlayerName), size = 1.2) +
-  geom_point(data = combined_data, aes(x = SEASON_ID, y = FG_PCT, group = PlayerName, color = PlayerName), size = 3, alpha = 0.7) +
-  labs(title = "Field Goal Percentage Over Seasons",
-       x = "Season",
-       y = "FG%",
-       color = "Player") +
-  scale_color_manual(values = color_values) +
-  theme_fivethirtyeight() +
-  theme(axis.text.x = element_text(size = 4))
-  
-  # Effective Field Goal Percentage
-ggplot(player_stats, aes(x = SEASON_ID, y = eFG_PCT, group = PlayerName, color = PlayerGroup)) +
-  geom_line(alpha = 0.5) +
-  geom_line(data = combined_data, aes(x = SEASON_ID, y = eFG_PCT, group = PlayerName, color = PlayerName), size = 1.2) +
-  geom_point(data = combined_data, aes(x = SEASON_ID, y = eFG_PCT, group = PlayerName, color = PlayerName), size = 3, alpha = 0.7) +
-  labs(title = "Effective Field Goal Percentage Over Seasons",
-       x = "Season",
-       y = "eFG%",
-       color = "Player") +
-  scale_color_manual(values = color_values) +
-  theme_fivethirtyeight() +
-  theme(axis.text.x = element_text(size = 4))
-
-
-# True Shooting Percentage
-ggplot(player_stats, aes(x = SEASON_ID, y = TS_PCT, group = PlayerName, color = PlayerGroup)) +
-  geom_line(alpha = 0.5) +
-  geom_line(data = combined_data, aes(x = SEASON_ID, y = TS_PCT, group = PlayerName, color = PlayerName), size = 1.2) +
-  geom_point(data = combined_data, aes(x = SEASON_ID, y = TS_PCT, group = PlayerName, color = PlayerName), size = 3, alpha = 0.7) +
-  labs(title = "True Shooting Percentage Over Seasons",
-       x = "Season",
-       y = "TS%",
-       color = "Player") +
-  scale_color_manual(values = color_values) +
-  theme_fivethirtyeight() +
-  theme(axis.text.x = element_text(size = 4))
-
-# Player Efficiency Rating
-ggplot(player_stats, aes(x = SEASON_ID, y = PER, group = PlayerName, color = PlayerGroup)) +
-  geom_line(alpha = 0.5) +
-  geom_line(data = combined_data, aes(x = SEASON_ID, y = PER, group = PlayerName, color = PlayerName), size = 1.2) +
-  geom_point(data = combined_data, aes(x = SEASON_ID, y = PER, group = PlayerName, color = PlayerName), size = 3, alpha = 0.7) +
-  geom_smooth(data = combined_data, aes(x = SEASON_ID, y = PER, group = PlayerName, color = PlayerName), method = "loess", se = FALSE, linetype = "dashed", alpha = 0.5) +
-  labs(title = "Player Efficiency Rating Over Seasons",
-       x = "Season",
-       y = "PER",
-       color = "Player") +
-  scale_color_manual(values = color_values) +
-  theme_fivethirtyeight() +
-  theme(axis.text.x = element_text(size = 4))
-
+print(paste("Anthony Davis - Career Avg eFG%:", round(anthony_davis_career_avg$career_avg_efg, 2)))
+print(paste("Anthony Davis - Career Avg FG%:", round(anthony_davis_career_avg$career_avg_fg, 2)))
+print(paste("Anthony Davis - Career Avg TS%:", round(anthony_davis_career_avg$career_avg_ts, 2)))
 
 # nolint end: line_length_linter

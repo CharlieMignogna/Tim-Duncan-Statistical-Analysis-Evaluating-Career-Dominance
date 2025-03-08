@@ -160,7 +160,7 @@ anthony_davis_data <- progress_data %>%
 
 ### Calculate Average Stats
 ```R
-# Calculate average stats for all players
+# Calculate average PTS, BLK, STl, RED, and AST for all players
 all_players_avg_stats <- progress_data %>%
   group_by(PlayerName, SEASON_ID) %>%
   summarize(
@@ -169,9 +169,6 @@ all_players_avg_stats <- progress_data %>%
     avg_steals = mean(STL, na.rm = TRUE),
     avg_rebounds = mean(REB, na.rm = TRUE),
     avg_assists = mean(AST, na.rm = TRUE),
-    avg_fg_pct = mean(FG_PCT, na.rm = TRUE),
-    avg_fg3_pct = mean(FG3_PCT, na.rm = TRUE),
-    avg_ft_pct = mean(FT_PCT, na.rm = TRUE)
   )
 
 # Add a column to distinguish Tim Duncan and Anthony Davis from other players
@@ -272,36 +269,80 @@ We can go further, however, and plot these averages and compare each player agai
 - Davis's numbers are likely more representative of his prime, but it's important to remember that his career is still ongoing, and his stats could change significantly.
 
 ## Shooting Analysis
-Now, I'm going to take a look at how each player performed when it came to making shots. To start, again we'll focus on season averages.
+Now, I'm going to take a look at how each player performed when it came to making shots. I wrote a simple python script to compute some shooting meterics (eFG%, FG%, and TS%), and store them in a csv
 
-```R
-tim_duncan_avg_fg_pct <- round(mean(tim_duncan_data$FG_PCT, na.rm = TRUE), 2)
-tim_duncan_avg_fg3_pct <- round(mean(tim_duncan_data$FG3_PCT, na.rm = TRUE), 2)
-tim_duncan_avg_ft_pct <- round(mean(tim_duncan_data$FT_PCT, na.rm = TRUE), 2)
-anthony_davis_avg_fg_pct <- round(mean(anthony_davis_data$FG_PCT, na.rm = TRUE), 2)
-anthony_davis_avg_fg3_pct <- round(mean(anthony_davis_data$FG3_PCT, na.rm = TRUE), 2)
-anthony_davis_avg_ft_pct <- round(mean(anthony_davis_data$FT_PCT, na.rm = TRUE), 2)
+```python
+import pandas as pd
+
+nba_data = pd.read_csv('../Stats_Data/combined_stats.csv')
+
+# Calculate shooting metrics for all players
+nba_data['eFG%'] = (nba_data['FGM'] + 0.5 * nba_data['FG3M']) / nba_data['FGA']
+nba_data['FG%'] = nba_data['FGM'] / nba_data['FGA']
+nba_data['TS%'] = nba_data['PTS'] / (2 * (nba_data['FGA'] + 0.44 * nba_data['FTA']))
+
+# Save the results to a new CSV file
+nba_data.to_csv('../Stats_Data/shooting_metrics.csv', index=False)
 ```
 
+With this CSV, I moved to R and read in the data and plotted their per-season stats, along with the rest of the NBA since 1979 (when the 3 point line was added). The graphs were initially very ugly because of how many outliers there were but after cleaning it up (filtered out players who played < 20 games in a season) the graphs are pretty interesting, you can see the game shift towards prioritizing 3pt shooting
+
+### Field Goal Percentage
+This is the most basic of shooting statistics, the number of field goal makes out of their total field goal attempts
+![FG%](Images/FG%.png)
+
+- Both Tim Duncan and Anthony Davis are consistently above the average of the league, as shown by the dense cluster of gray lines below them
+- Tim Duncan maintains a remarkably consistant FG% throughout his career, whereas Anthony Davis has more variability
+- Its important to note that as the league has changed, players are expected to take more shots from farther out and Anthony Davis has maintained a high FG% despite attempting more jump shots and 3-pointers than Duncan did
+- That being said Duncan maintains a high FG% in his later years, demonstrating his ability to adapt and remain efficient as his athleticism declined
+
+
+### Effective Shooting Percentage
+eFG% builds upon FG% by accounting for 3pt makes. It gives a more accurate representation of a player's shooting efficiency, especially in today's game where 3-point shooting is prevalent.
+Formula: ((Field Goals Made) + 0.5 * (3-Point Field Goals Made)) / (Field Goal Attempts)
+
+![eFG%](Images/eFG%.png)
+- In this graph shows the recent shift towards prioritizing the 3 point shot (the rising of the dense gray lines)
+- Because Duncan rarely shot 3-pointers, his eFG% is very close to his FG%. The consistency shows his dominance in the paint.
+- Davis also displays a high eFG% throughout his career, showcasing his overall scoring efficiency.
+- Davis's eFG% is more influenced by his 3-point shooting compared to Duncan. This is because he attempts more 3s. The variability may reflect the inconsistency of his 3-point shot.
+- We can see that as the league was changing Duncan kept dominating the paint and he remained an elite scorer
+
+### True Shooting Percentage
+This is the most comprehensive shooting efficiency statistic. It takes into account 2-point field goals, 3-point field goals, and free throws. It is a more complex formula, but it essentially measures how many points a player scores per shooting possession. 
+Formula: (TS% = Points / (2 * (Field Goal Attempts + 0.44 * Free Throw Attempts)))
+
+![TS%%](Images/TS%.png)
+- Once again Tim Duncan's line has barely changes, putting is consistency and shooting efficiency on display
+- Davis also displays a high TS%, comparable to Duncan's, showcasing his overall scoring efficiency.
+- Additionally Davis's TS% is also influenced by his free throw shooting, which tends to be more consistent than Duncan's.
+
+## Numerical Career Shooting Averages
 ### Tim Duncan
-- **FG%:** 50%
-- **FG3%:** 14%
-- **FT%:** 70%
+- **eFG%:** 51%
+- **FG%%:** 50%
+- **TS%:** 55%
 
 ### Anthony Davis
-- **FG%:** 53%
-- **FG3%:** 30%
-- **FT%:** 78%
+- **eFG%:** 54%
+- **FG%%:** 52%
+- **TS%:** 59%
 
-### Brief Analysis of Career Shooting Averages
-- These reveal that Anthony Davis seems to be the more efficient scorer of the two, as he has slightly higher averages in field goal percentage and free throw percentage and a significantly higher 3-point percentage.
-- Duncan was a highly efficient scorer in his own right, especially in the mid-range, Davis's ability to stretch the floor and convert free throws makes him statistically the more efficient scorer.
-- Again, it's important to remember that these are career averages. Duncan's prime scoring efficiency was likely higher than his career average due to the decline in his athleticism and role later in his career.
+### Brief Analysis of Career Shooting Averages - Reliability vs. Versatility
 
+#### Tim Duncan
+- Foundation of Efficiency (FG%): Duncan's career was built on a rock-solid FG%. He was an incredibly accurate shooter, particularly inside. This was where he flourished – consistent, reliable scoring near the basket.
 
-![FG%](Images/FG_PCT.png)
-![FT%](Images/FT_PCT.png)
-![FG3%](Images/FG3_PCT.png)
+- Dominance in the paint (eFG%): Duncan's eFG% closely mirrors his FG%, and that tells a story. He didn't rely heavily on the 3-pointer, but he was so dominant in his scoring areas (post-ups, short jumpers) that his efficiency remained top-tier.
+
+- Reliable Scoring Engine (TS%): Duncan's TS% underscores his overall dependability. He wasn't just a good field goal shooter, he was a highly efficient scorer. While his free throw shooting wasn't his strongest suit, his high FG% and consistent scoring made his TS% impressive and demonstrated his ability to score effectively in various ways.
+
+#### Anthony Davis
+- Versatile Accuracy (FG%): Davis showcases a high FG%, reflecting his ability to score inside and from midrange. His FG% speaks to his overall skill and touch around the basket.
+
+- Modern Efficiency (eFG%): Davis's eFG% acknowledges his more modern style. He has a 3-point shot in his arsenal, which elevates his eFG% and showcases his ability to score efficiently in different ways. His eFG% illustrates his offensive versatility and efficiency in the contemporary NBA.
+
+- Multi-Faceted Scoring (TS%): Davis's TS% emphasizes his diverse scoring toolkit. He's a scorer who gets points from field goals, 3-pointers, and free throws. His TS% reflects his ability to contribute points in various ways, making him a potent and efficient offensive threat
 
 
 # II. Advanced Metrics 
