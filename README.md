@@ -365,14 +365,14 @@ anthony_davis_career_avg <- highlight_players %>%
   )
 ```
 ### Tim Duncan
-- **eFG%:** 51%
-- **FG%%:** 50%
-- **TS%:** 55%
+- **eFG%:** .51
+- **FG%:** .50
+- **TS%:** .55
 
 ### Anthony Davis
-- **eFG%:** 54%
-- **FG%%:** 52%
-- **TS%:** 59%
+- **eFG%:** .54
+- **FG%:** .52
+- **TS%:** .59
 
 ### Brief Analysis of Career Shooting Averages - Reliability vs. Versatility
 
