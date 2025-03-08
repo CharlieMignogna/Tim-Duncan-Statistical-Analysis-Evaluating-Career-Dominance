@@ -287,8 +287,35 @@ nba_data.to_csv('../Stats_Data/shooting_metrics.csv', index=False)
 
 With this CSV, I moved to R and read in the data and plotted their per-season stats, along with the rest of the NBA since 1979 (when the 3 point line was added). The graphs were initially very ugly because of how many outliers there were but after cleaning it up (filtered out players who played < 20 games in a season) the graphs are pretty interesting, you can see the game shift towards prioritizing 3pt shooting
 
+```R
+# Filter data to include only seasons from 1979 onward (the year the 3-point line was introduced)
+nba_data <- nba_data %>%
+  filter(SEASON_ID >= "1979-80" & GP > 20)
+
+highlight_players <- highlight_players %>%
+  filter(SEASON_ID >= "1979-80" & GP > 20)
+```
+
+I again used ggplot2 to create the graphs, below is a snippet of how I set up each graph
+```R
+ggplot() +
+  geom_line(data = nba_data %>% filter(!PlayerName %in% c("Tim Duncan", "Anthony Davis")), aes(x = SEASON_ID, y = `eFG%`, group = PlayerName), color = "grey", alpha = 0.5) +
+  geom_line(data = highlight_players %>% filter(PlayerName == "Tim Duncan"), aes(x = SEASON_ID, y = `eFG%`, group = PlayerName), color = "blue", size = 1.5) +
+  geom_line(data = highlight_players %>% filter(PlayerName == "Anthony Davis"), aes(x = SEASON_ID, y = `eFG%`, group = PlayerName), color = "red", size = 1.5) +
+  geom_text(data = tim_duncan_midpoint, aes(x = SEASON_ID, y = `eFG%`, label = "Tim Duncan"), color = "blue", vjust = -1.5) +
+  geom_text(data = anthony_davis_midpoint, aes(x = SEASON_ID, y = `eFG%`, label = "Anthony Davis"), color = "red", vjust = -1.5) +
+  labs(
+    title = "Effective Field Goal Percentage (eFG%) of NBA Players by Season",
+    x = "Season",
+    y = "Effective Field Goal Percentage (eFG%)"
+  ) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
 ### Field Goal Percentage
 This is the most basic of shooting statistics, the number of field goal makes out of their total field goal attempts
+
 ![FG%](Images/FG%.png)
 
 - Both Tim Duncan and Anthony Davis are consistently above the average of the league, as shown by the dense cluster of gray lines below them
@@ -297,11 +324,12 @@ This is the most basic of shooting statistics, the number of field goal makes ou
 - That being said Duncan maintains a high FG% in his later years, demonstrating his ability to adapt and remain efficient as his athleticism declined
 
 
-### Effective Shooting Percentage
+### Effective Field Goal Percentage
 eFG% builds upon FG% by accounting for 3pt makes. It gives a more accurate representation of a player's shooting efficiency, especially in today's game where 3-point shooting is prevalent.
 Formula: ((Field Goals Made) + 0.5 * (3-Point Field Goals Made)) / (Field Goal Attempts)
 
 ![eFG%](Images/eFG%.png)
+
 - In this graph shows the recent shift towards prioritizing the 3 point shot (the rising of the dense gray lines)
 - Because Duncan rarely shot 3-pointers, his eFG% is very close to his FG%. The consistency shows his dominance in the paint.
 - Davis also displays a high eFG% throughout his career, showcasing his overall scoring efficiency.
@@ -313,11 +341,29 @@ This is the most comprehensive shooting efficiency statistic. It takes into acco
 Formula: (TS% = Points / (2 * (Field Goal Attempts + 0.44 * Free Throw Attempts)))
 
 ![TS%%](Images/TS%.png)
+
 - Once again Tim Duncan's line has barely changes, putting is consistency and shooting efficiency on display
 - Davis also displays a high TS%, comparable to Duncan's, showcasing his overall scoring efficiency.
 - Additionally Davis's TS% is also influenced by his free throw shooting, which tends to be more consistent than Duncan's.
 
 ## Numerical Career Shooting Averages
+```R
+tim_duncan_career_avg <- highlight_players %>%
+  filter(PlayerName == "Tim Duncan") %>%
+  summarize(
+    career_avg_efg = mean(`eFG%`, na.rm = TRUE),
+    career_avg_fg = mean(`FG%`, na.rm = TRUE),
+    career_avg_ts = mean(`TS%`, na.rm = TRUE)
+  )
+
+anthony_davis_career_avg <- highlight_players %>%
+  filter(PlayerName == "Anthony Davis") %>%
+  summarize(
+    career_avg_efg = mean(`eFG%`, na.rm = TRUE),
+    career_avg_fg = mean(`FG%`, na.rm = TRUE),
+    career_avg_ts = mean(`TS%`, na.rm = TRUE)
+  )
+```
 ### Tim Duncan
 - **eFG%:** 51%
 - **FG%%:** 50%
